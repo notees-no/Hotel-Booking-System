@@ -31,6 +31,9 @@ public class User extends AbstractEntity implements UserDetails {
 	@Column(name = "role", nullable = false)
 	private Role role;
 
+	@Column(nullable = false)
+	private String authority;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Reservation> reservations;
 

@@ -21,9 +21,6 @@ public class Hotel extends AbstractEntity {
 	private String name;
 
 	@Column(unique = true)
-	private String hotelEmail;
-
-	private String password;
 
 	private String hotelPhone;
 

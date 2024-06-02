@@ -18,13 +18,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User read(Long id) {
-        return userRepository.findById(id).get();
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Override
     public List<User> read() {
         return userRepository.findAll();
     }
+
     @Override
     public void save(User user) {
         userRepository.save(user);
@@ -42,15 +43,20 @@ public class UserServiceImpl implements UserService {
         user.setPassword(entity.getPassword());
         userRepository.save(user);
     }
+
     @Override
     public User getByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
-
     }
+
     @Override
     public UserDetailsService userDetailsService() {
         return this::getByUsername;
     }
 
+    @Override
+    public void create(User user) {
+        userRepository.save(user);
+    }
 }
