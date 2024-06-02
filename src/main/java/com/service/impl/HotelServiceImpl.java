@@ -42,7 +42,6 @@ public class HotelServiceImpl implements HotelService {
 		Hotel existingHotel = read(hotel.getId());
 		existingHotel.setName(hotel.getName());
 		existingHotel.setHotelPhone(hotel.getHotelPhone());
-		existingHotel.setHotelTelephone(hotel.getHotelTelephone());
 		existingHotel.setHotelType(hotel.getHotelType());
 		existingHotel.setRole(hotel.getRole());
 		existingHotel.setAmenities(hotel.getAmenities());

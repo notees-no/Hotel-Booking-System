@@ -24,8 +24,6 @@ public class Hotel extends AbstractEntity {
 
 	private String hotelPhone;
 
-	private String hotelTelephone;
-
 	@Enumerated(EnumType.STRING)
 	private HotelType hotelType;
 
