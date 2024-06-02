@@ -1,82 +1,50 @@
 package com.controller;
 
-import com.enums.Role;
-import com.entity.User;
-import com.service.Service;
-import com.service.impl.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
-	@Autowired
-	private UserServiceImpl service;
-
-	// Доступ для всех пользователей
-	@GetMapping
-	public ResponseEntity<List<User>> getAllUsers() {
-		List<User> entities = service.read();
-		if (entities.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(entities, HttpStatus.OK);
+	// Для неавторизованных пользователей
+	@GetMapping("/public-info")
+	public ResponseEntity<String> getPublicUserInfo() {
+		// Логика получения публичной информации о пользователях для неавторизованных пользователей
+		return ResponseEntity.ok("Public user information");
 	}
 
+	// Для авторизованных пользователей
 	@GetMapping("/{id}")
-	public ResponseEntity<User> getById(@PathVariable long id) {
-		User user = service.read(id);
-		if (user == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String currentPrincipalName = authentication.getName();
-		User currentUser = service.getByUsername(currentPrincipalName);
-
-		if (currentUser.getId().equals(user.getId()) && currentUser.getRole().equals(Role.ROLE_USER)) {
-			return new ResponseEntity<>(user, HttpStatus.OK);
-		}
-		else {
-			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		}
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<String> getUserById(@PathVariable Long id) {
+		// Логика получения информации о пользователе по его идентификатору для авторизованных пользователей
+		return ResponseEntity.ok("Information about user with ID " + id);
 	}
 
+	// Для администраторов
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> addUserForAdmin(@RequestBody String userData) {
+		// Логика добавления нового пользователя для администраторов
+		return ResponseEntity.ok("New user added");
+	}
+
+	// Для администраторов
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteUser(@PathVariable long id) {
-		User user = service.read(id);
-		if (user == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-
-		service.delete(id);
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteUserForAdmin(@PathVariable Long id) {
+		// Логика удаления пользователя по его идентификатору для администраторов
+		return ResponseEntity.ok("User with ID " + id + " deleted");
 	}
 
-	@PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> updateUser(@RequestBody User updatedUser) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String currentPrincipalName = authentication.getName();
-		User currentUser = service.getByUsername(currentPrincipalName);
-
-		if (currentUser == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-
-		updatedUser.setId(currentUser.getId());
-		service.edit(updatedUser);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-	public Service<User> getService() {
-		return service;
+	// Для администраторов
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> updateUserForAdmin(@PathVariable Long id, @RequestBody String userData) {
+		// Логика обновления информации о пользователе для администраторов
+		return ResponseEntity.ok("Information about user with ID " + id + " updated");
 	}
 }

@@ -1,63 +1,48 @@
 package com.controller;
 
-import com.entity.Hotel;
-import com.service.HotelService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/hotel")
 public class HotelController {
 
-	@Autowired
-	private HotelService hotelService;
-
-	// Для всех пользователей
+	// Для неавторизованных
 	@GetMapping("/{id}")
-	public ResponseEntity<Hotel> getHotelById(@PathVariable Long id) {
-		Hotel hotel = hotelService.read(id);
-		return hotel != null ?
-				new ResponseEntity<>(hotel, HttpStatus.OK) :
-				new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<String> getHotelByIdForUnauthorized(@PathVariable Long id) {
+		// Логика получения информации об отеле для неавторизованных
+		return ResponseEntity.ok("Information about hotel with ID " + id);
 	}
 
-	// Для всех пользователей
+	// Для неавторизованных
 	@GetMapping("/name/{name}")
-	public ResponseEntity<List<Hotel>> getHotelByName(@PathVariable String name) {
-		List<Hotel> hotelList = hotelService.readByName(name);
-		return hotelList != null && !hotelList.isEmpty() ?
-				new ResponseEntity<>(hotelList, HttpStatus.OK) :
-				new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<String> getHotelsByNameForUnauthorized(@PathVariable String name) {
+		// Логика получения списка отелей по названию для неавторизованных
+		return ResponseEntity.ok("List of hotels with name " + name);
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@PostMapping
-	public ResponseEntity<Void> addHotel(@RequestBody Hotel hotel) {
-		hotelService.save(hotel);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> addHotelForAdmin(@RequestBody String hotelData) {
+		// Логика добавления нового отеля для администраторов
+		return ResponseEntity.ok("New hotel added");
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteHotel(@PathVariable Long id) {
-		hotelService.delete(id);
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteHotelForAdmin(@PathVariable Long id) {
+		// Логика удаления отеля для администраторов
+		return ResponseEntity.ok("Hotel with ID " + id + " deleted");
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> updateHotel(@PathVariable Long id, @RequestBody Hotel hotel) {
-		hotel.setId(id);
-		hotelService.edit(hotel);
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> updateHotelForAdmin(@PathVariable Long id, @RequestBody String hotelData) {
+		// Логика обновления информации об отеле для администраторов
+		return ResponseEntity.ok("Information about hotel with ID " + id + " updated");
 	}
 }
-

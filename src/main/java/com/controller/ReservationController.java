@@ -1,63 +1,50 @@
 package com.controller;
 
-import com.entity.Reservation;
-import com.enums.ReservationStatus;
-import com.service.ReservationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/reservation")
 public class ReservationController {
 
-	@Autowired
-	private ReservationService reservationService;
-
-	// Для всех пользователей
+	// Для пользователей
 	@GetMapping("/{id}")
-	public ResponseEntity<Reservation> getReservationById(@PathVariable Long id) {
-		Reservation reservation = reservationService.read(id);
-		return reservation != null ?
-				new ResponseEntity<>(reservation, HttpStatus.OK) :
-				new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<String> getReservationByIdForUser(@PathVariable Long id) {
+		// Логика получения информации о бронировании для пользователей
+		return ResponseEntity.ok("Information about reservation with ID " + id);
 	}
 
-	// Для всех пользователей
+	// Для пользователей
 	@GetMapping("/status/{status}")
-	public ResponseEntity<List<Reservation>> getReservationsByStatus(@PathVariable ReservationStatus status) {
-		List<Reservation> reservations = reservationService.readByStatus(status);
-		return !reservations.isEmpty() ?
-				new ResponseEntity<>(reservations, HttpStatus.OK) :
-				new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<String> getReservationsByStatusForUser(@PathVariable String status) {
+		// Логика получения списка бронирований по статусу для пользователей
+		return ResponseEntity.ok("List of reservations with status " + status);
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для пользователей
 	@PostMapping
-	public ResponseEntity<Void> addReservation(@RequestBody Reservation reservation) {
-		reservationService.save(reservation);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<String> addReservationForUser(@RequestBody String reservationData) {
+		// Логика добавления нового бронирования для пользователей
+		return ResponseEntity.ok("New reservation added");
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-		reservationService.delete(id);
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteReservationForAdmin(@PathVariable Long id) {
+		// Логика удаления бронирования для администраторов
+		return ResponseEntity.ok("Reservation with ID " + id + " deleted");
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> updateReservation(@PathVariable Long id, @RequestBody Reservation reservation) {
-		reservation.setId(id);
-		reservationService.edit(reservation);
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> updateReservationForAdmin(@PathVariable Long id, @RequestBody String reservationData) {
+		// Логика обновления информации о бронировании для администраторов
+		return ResponseEntity.ok("Information about reservation with ID " + id + " updated");
 	}
 }

@@ -1,62 +1,50 @@
 package com.controller;
 
-import com.entity.Room;
-import com.service.RoomService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/room")
 public class RoomController {
 
-	@Autowired
-	private RoomService roomService;
-
-	// Для всех пользователей
+	// Для пользователей
 	@GetMapping("/{id}")
-	public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
-		Room room = roomService.read(id);
-		return room != null ?
-				new ResponseEntity<>(room, HttpStatus.OK) :
-				new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<String> getRoomByIdForUser(@PathVariable Long id) {
+		// Логика получения информации о номере для пользователей
+		return ResponseEntity.ok("Information about room with ID " + id);
 	}
 
-	// Для всех пользователей
+	// Для пользователей
 	@GetMapping("/number/{roomNumber}")
-	public ResponseEntity<List<Room>> getRoomsByRoomNumber(@PathVariable Integer roomNumber) {
-		List<Room> rooms = roomService.readByRoomNumber(roomNumber);
-		return !rooms.isEmpty() ?
-				new ResponseEntity<>(rooms, HttpStatus.OK) :
-				new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<String> getRoomsByNumberForUser(@PathVariable String roomNumber) {
+		// Логика получения списка номеров по номеру для пользователей
+		return ResponseEntity.ok("List of rooms with number " + roomNumber);
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@PostMapping
-	public ResponseEntity<Void> addRoom(@RequestBody Room room) {
-		roomService.save(room);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> addRoomForAdmin(@RequestBody String roomData) {
+		// Логика добавления нового номера для администраторов
+		return ResponseEntity.ok("New room added");
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-		roomService.delete(id);
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> deleteRoomForAdmin(@PathVariable Long id) {
+		// Логика удаления номера для администраторов
+		return ResponseEntity.ok("Room with ID " + id + " deleted");
 	}
 
-	// Доступ только для администратора
-	@PreAuthorize("hasRole('ADMIN')")
+	// Для администраторов
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> updateRoom(@PathVariable Long id, @RequestBody Room room) {
-		room.setId(id);
-		roomService.edit(room);
-		return new ResponseEntity<>(HttpStatus.OK);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> updateRoomForAdmin(@PathVariable Long id, @RequestBody String roomData) {
+		// Логика обновления информации о номере для администраторов
+		return ResponseEntity.ok("Information about room with ID " + id + " updated");
 	}
 }
