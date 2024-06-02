@@ -18,7 +18,7 @@ public class UserController {
 
 	// Для авторизованных пользователей
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 	public ResponseEntity<String> getUserById(@PathVariable Long id) {
 		// Логика получения информации о пользователе по его идентификатору для авторизованных пользователей
 		return ResponseEntity.ok("Information about user with ID " + id);

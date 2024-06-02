@@ -10,7 +10,7 @@ public class RoomController {
 
 	// Для пользователей
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 	public ResponseEntity<String> getRoomByIdForUser(@PathVariable Long id) {
 		// Логика получения информации о номере для пользователей
 		return ResponseEntity.ok("Information about room with ID " + id);
@@ -18,7 +18,7 @@ public class RoomController {
 
 	// Для пользователей
 	@GetMapping("/number/{roomNumber}")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 	public ResponseEntity<String> getRoomsByNumberForUser(@PathVariable String roomNumber) {
 		// Логика получения списка номеров по номеру для пользователей
 		return ResponseEntity.ok("List of rooms with number " + roomNumber);

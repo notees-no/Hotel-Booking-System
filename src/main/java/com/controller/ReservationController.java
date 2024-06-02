@@ -10,7 +10,7 @@ public class ReservationController {
 
 	// Для пользователей
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 	public ResponseEntity<String> getReservationByIdForUser(@PathVariable Long id) {
 		// Логика получения информации о бронировании для пользователей
 		return ResponseEntity.ok("Information about reservation with ID " + id);
@@ -18,7 +18,7 @@ public class ReservationController {
 
 	// Для пользователей
 	@GetMapping("/status/{status}")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 	public ResponseEntity<String> getReservationsByStatusForUser(@PathVariable String status) {
 		// Логика получения списка бронирований по статусу для пользователей
 		return ResponseEntity.ok("List of reservations with status " + status);
@@ -26,7 +26,7 @@ public class ReservationController {
 
 	// Для пользователей
 	@PostMapping
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 	public ResponseEntity<String> addReservationForUser(@RequestBody String reservationData) {
 		// Логика добавления нового бронирования для пользователей
 		return ResponseEntity.ok("New reservation added");
