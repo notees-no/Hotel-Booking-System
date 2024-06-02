@@ -46,14 +46,17 @@ public class AuthenticationService {
      * @return токен
      */
     public JwtAuthenticationResponse signIn(SignInRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getUsername(),
-                request.getPassword()
-        ));
+        String username = request.getUsername();
+        String password = request.getPassword();
 
-        var user = userService.getByUsername(request.getUsername());
+        // Здесь можно добавить валидацию имени пользователя и пароля
+
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+        var user = userService.getByUsername(username);
 
         var jwt = jwtService.generateToken(user);
         return new JwtAuthenticationResponse(jwt);
     }
+
 }

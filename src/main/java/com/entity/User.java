@@ -4,6 +4,7 @@ import com.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -31,38 +32,35 @@ public class User extends AbstractEntity implements UserDetails {
 	@Column(name = "role", nullable = false)
 	private Role role;
 
-	@Column(nullable = false)
-	private String authority;
-
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Reservation> reservations;
 
-	@JsonIgnore
 	@Override
+	@JsonIgnore
 	public List<SimpleGrantedAuthority> getAuthorities() {
 		return List.of(new SimpleGrantedAuthority(role.name()));
 	}
 
-	@JsonIgnore
 	@Override
+	@JsonIgnore
 	public boolean isAccountNonExpired() {
 		return true;
 	}
 
-	@JsonIgnore
 	@Override
+	@JsonIgnore
 	public boolean isAccountNonLocked() {
 		return true;
 	}
 
-	@JsonIgnore
 	@Override
+	@JsonIgnore
 	public boolean isCredentialsNonExpired() {
 		return true;
 	}
 
-	@JsonIgnore
 	@Override
+	@JsonIgnore
 	public boolean isEnabled() {
 		return true;
 	}
