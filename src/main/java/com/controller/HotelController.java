@@ -1,13 +1,20 @@
 package com.controller;
 
 import com.entity.Hotel;
+import com.entity.User;
+import com.enums.Role;
 import com.service.HotelService;
+import com.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -15,52 +22,43 @@ import java.util.List;
 public class HotelController {
 
 	private final HotelService hotelService;
+	private final UserService userService;
 
 	@Autowired
-	public HotelController(HotelService hotelService) {
+	public HotelController(HotelService hotelService, UserService userService) {
 		this.hotelService = hotelService;
+		this.userService = userService;
 	}
 
-	// Логика получения информации об отеле для неавторизованных
 	@GetMapping("/{id}")
-	public ResponseEntity<Hotel> getHotelByIdForUnauthorized(@PathVariable Long id) {
+	public ResponseEntity<Hotel> getHotelById(@PathVariable Long id) {
 		Hotel hotel = hotelService.read(id);
-		if (hotel == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel not found");
-		}
-		return ResponseEntity.ok(hotel);
+		return checkEntityAndRole(hotel);
 	}
 
-	// Логика получения списка отелей по названию для неавторизованных
 	@GetMapping("/name/{name}")
-	public ResponseEntity<List<Hotel>> getHotelsByNameForUnauthorized(@PathVariable String name) {
+	public ResponseEntity<List<Hotel>> getHotelsByName(@PathVariable String name) {
 		List<Hotel> hotels = hotelService.readByName(name);
-		if (hotels.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotels not found with name: " + name);
-		}
-		return ResponseEntity.ok(hotels);
+		return checkListOfEntityAndRole(hotels);
 	}
 
-	// Логика добавления нового отеля для администраторов
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> addHotelForAdmin(@RequestBody Hotel hotel) {
+	public ResponseEntity<Hotel> addHotel(@RequestBody Hotel hotel) {
 		hotelService.save(hotel);
-		return ResponseEntity.ok("New hotel added");
+		return ResponseEntity.status(HttpStatus.CREATED).body(hotel);
 	}
 
-	// Логика удаления отеля для администраторов
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> deleteHotelForAdmin(@PathVariable Long id) {
+	public ResponseEntity<String> deleteHotel(@PathVariable Long id) {
 		hotelService.delete(id);
 		return ResponseEntity.ok("Hotel with ID " + id + " deleted");
 	}
 
-	// Логика обновления информации об отеле для администраторов
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> updateHotelForAdmin(@PathVariable Long id, @RequestBody Hotel hotelData) {
+	public ResponseEntity<Hotel> updateHotel(@PathVariable Long id, @RequestBody Hotel hotelData) {
 		Hotel existingHotel = hotelService.read(id);
 		if (existingHotel == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel not found");
@@ -71,6 +69,46 @@ public class HotelController {
 		existingHotel.setRole(hotelData.getRole());
 		existingHotel.setAmenities(hotelData.getAmenities());
 		hotelService.edit(existingHotel);
-		return ResponseEntity.ok("Information about hotel with ID " + id + " updated");
+		return ResponseEntity.ok(existingHotel);
+	}
+
+	private User getCurrentUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String currentPrincipalName = authentication.getName();
+		return userService.getByUsername(currentPrincipalName);
+	}
+
+	private ResponseEntity<Hotel> checkEntityAndRole(Hotel hotel) {
+		if (hotel == null) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+
+		User currentUser = getCurrentUser();
+
+		if (currentUser.getRole().equals(Role.ROLE_ADMIN)) {
+			return new ResponseEntity<>(hotel, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+	}
+
+	private ResponseEntity<List<Hotel>> checkListOfEntityAndRole(List<Hotel> hotels) {
+		if (hotels.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+
+		List<Hotel> allowedHotels = new ArrayList<>();
+		for (Hotel hotel : hotels) {
+			ResponseEntity<Hotel> responseEntity = checkEntityAndRole(hotel);
+			if (responseEntity.getStatusCode() == HttpStatus.OK) {
+				allowedHotels.add(hotel);
+			}
+		}
+
+		if (allowedHotels.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+
+		return new ResponseEntity<>(allowedHotels, HttpStatus.OK);
 	}
 }
