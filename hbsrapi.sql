@@ -79,8 +79,8 @@ CREATE TABLE IF NOT EXISTS `reservations` (
 
 -- Заполнение таблицы hotels
 INSERT INTO hotels (hotel_id, name, hotelPhone, hotelType, role)
-VALUES (1, 'Hotel A', '123456789', 'HOTEL', 'ROLE_ADMIN'),
-       (2, 'Hotel B', '987654321', 'HOTEL', 'ROLE_USER');
+VALUES (1, 'Hotel_A', '123456789', 'HOTEL', 'ROLE_ADMIN'),
+       (2, 'Hotel_B', '987654321', 'HOTEL', 'ROLE_USER');
 
 -- Заполнение таблиц users
 INSERT INTO users (id, username, password, role)
