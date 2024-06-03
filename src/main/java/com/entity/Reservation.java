@@ -37,5 +37,6 @@ public class Reservation extends AbstractEntity {
 	private Hotel hotel;
 
 	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "user_id")
 	private User user;
 }
