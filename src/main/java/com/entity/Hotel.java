@@ -4,16 +4,14 @@ import java.util.List;
 import com.enums.HotelType;
 import com.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Entity
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name= "hotels")
 @AttributeOverride(name = "id", column = @Column(name = "hotel_id"))
 public class Hotel extends AbstractEntity {

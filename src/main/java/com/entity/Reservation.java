@@ -5,15 +5,13 @@ import java.time.LocalDate;
 import com.enums.ReservationStatus;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @Entity
 @Table(name= "reservations")
 @AttributeOverride(name = "id", column = @Column(name = "reservation_id"))

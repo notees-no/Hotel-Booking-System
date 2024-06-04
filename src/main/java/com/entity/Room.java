@@ -6,15 +6,13 @@ import java.util.List;
 import com.enums.RoomType;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @Entity
 @Table(name= "rooms")
 @AttributeOverride(name = "id", column = @Column(name = "room_id"))
