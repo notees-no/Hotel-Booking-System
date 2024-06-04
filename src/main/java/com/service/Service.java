@@ -12,7 +12,7 @@ public interface Service <T extends AbstractEntity> {
 
     void save(T entity);
 
-    void delete(Long id);
+    boolean delete(Long id);
 
     void edit (T entity);
 }

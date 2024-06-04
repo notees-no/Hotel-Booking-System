@@ -33,10 +33,11 @@ public class RoomServiceImpl implements RoomService {
 	}
 
 	@Override
-	public void delete(Long id) {
+	public boolean delete(Long id) {
 		Room room = read(id);
 		roomRepository.delete(room);
-	}
+        return false;
+    }
 
 	@Override
 	public void edit(Room room) {

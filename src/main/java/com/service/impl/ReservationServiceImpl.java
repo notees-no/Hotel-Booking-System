@@ -35,10 +35,11 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public void delete(Long id) {
+	public boolean delete(Long id) {
 		Reservation reservation = read(id);
 		reservationRepository.delete(reservation);
-	}
+        return false;
+    }
 
 	@Override
 	public void edit(Reservation reservation) {

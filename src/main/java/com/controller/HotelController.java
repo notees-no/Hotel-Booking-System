@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @RestController
@@ -23,22 +23,22 @@ public class HotelController {
 
 	// Логика получения информации об отеле для неавторизованных
 	@GetMapping("/{id}")
-	public ResponseEntity<Hotel> getHotelByIdForUnauthorized(@PathVariable Long id) {
+	public ResponseEntity<?> getHotelByIdForUnauthorized(@PathVariable Long id) {
 		Hotel hotel = hotelService.read(id);
 		if (hotel == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel not found");
+			return new ResponseEntity<>("Hotel not found", HttpStatus.NOT_FOUND);
 		}
-		return ResponseEntity.ok(hotel);
+		return new ResponseEntity<>(hotel, HttpStatus.OK);
 	}
 
 	// Логика получения списка отелей по названию для неавторизованных
 	@GetMapping("/name/{name}")
-	public ResponseEntity<List<Hotel>> getHotelsByNameForUnauthorized(@PathVariable String name) {
+	public ResponseEntity<?> getHotelsByNameForUnauthorized(@PathVariable String name) {
 		List<Hotel> hotels = hotelService.readByName(name);
 		if (hotels.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotels not found with name: " + name);
+			return new ResponseEntity<>("Hotels not found with name: " + name, HttpStatus.NOT_FOUND);
 		}
-		return ResponseEntity.ok(hotels);
+		return new ResponseEntity<>(hotels, HttpStatus.OK);
 	}
 
 	// Логика добавления нового отеля для администраторов
@@ -46,15 +46,18 @@ public class HotelController {
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> addHotelForAdmin(@RequestBody Hotel hotel) {
 		hotelService.save(hotel);
-		return ResponseEntity.ok("New hotel added");
+		return new ResponseEntity<>("New hotel added", HttpStatus.CREATED);
 	}
 
 	// Логика удаления отеля для администраторов
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> deleteHotelForAdmin(@PathVariable Long id) {
-		hotelService.delete(id);
-		return ResponseEntity.ok("Hotel with ID " + id + " deleted");
+		boolean isDeleted = hotelService.delete(id);
+		if (!isDeleted) {
+			return new ResponseEntity<>("Hotel not found", HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>("Hotel with ID " + id + " deleted", HttpStatus.OK);
 	}
 
 	// Логика обновления информации об отеле для администраторов
@@ -63,7 +66,7 @@ public class HotelController {
 	public ResponseEntity<String> updateHotelForAdmin(@PathVariable Long id, @RequestBody Hotel hotelData) {
 		Hotel existingHotel = hotelService.read(id);
 		if (existingHotel == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel not found");
+			return new ResponseEntity<>("Hotel not found", HttpStatus.NOT_FOUND);
 		}
 		existingHotel.setName(hotelData.getName());
 		existingHotel.setHotelPhone(hotelData.getHotelPhone());
@@ -71,6 +74,6 @@ public class HotelController {
 		existingHotel.setRole(hotelData.getRole());
 		existingHotel.setAmenities(hotelData.getAmenities());
 		hotelService.edit(existingHotel);
-		return ResponseEntity.ok("Information about hotel with ID " + id + " updated");
+		return new ResponseEntity<>("Information about hotel with ID " + id + " updated", HttpStatus.OK);
 	}
 }

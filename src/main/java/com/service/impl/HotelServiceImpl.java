@@ -32,10 +32,11 @@ public class HotelServiceImpl implements HotelService {
 	}
 
 	@Override
-	public void delete(Long id) {
+	public boolean delete(Long id) {
 		Hotel hotel = read(id);
 		hotelRepository.delete(hotel);
-	}
+        return false;
+    }
 
 	@Override
 	public void edit(Hotel hotel) {
