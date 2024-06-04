@@ -1,32 +1,33 @@
 server:
   port: 8089
+  error:
+    whitelabel:
+      enabled: false
 
 spring:
-  application:
-    name: security-security
   datasource:
-    url: jdbc:mysql://localhost:3306/staywell?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useLegacyDatetimeCode=false
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/staywell?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useLegacyDatetimeCode=false
     username: root
     password: skiv3232
+  # JPA properties
   jpa:
     hibernate:
-      ddl-auto: update
-      naming:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-    open-in-view: false
-  mvc:
-    pathmatch:
-      matching-strategy: ANT_PATH_MATCHER
+      ddl-auto: none # When you launch the application for the first time - switch "none" at "create update"
+    show-sql: false
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    # database-platform: org.hibernate.dialect.MySQL55Dialect
+    #  open-in-view: false
+    generate-ddl: true
+
+  token:
+    signing:
+    key: 53A73E5F1C4E0A2D3B5F2D784E6A1B423D6F247D1F6E5C3A596D635A75327855
 
 logging:
   level:
-    org.springframework.web: INFO
-
-token:
-  signing:
-    key: 53A73E5F1C4E0A2D3B5F2D784E6A1B423D6F247D1F6E5C3A596D635A75327855
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG
