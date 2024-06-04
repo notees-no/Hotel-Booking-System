@@ -45,18 +45,19 @@ public class SecurityConfiguration {
                 }))
                 // Настройка доступа к конечным точкам
                 .authorizeHttpRequests(request -> request
-                        // Доступ для всех пользователей
-                        .requestMatchers("/user/public-info", "/hotel/{id}", "/hotel/name/{name}").permitAll()
-                        // Доступ для пользователей с ролями USER и ADMIN
-                        .requestMatchers("/reservation/{id}", "/reservation/status/{status}", "/reservation", "/room/{id}", "/room/number/{roomNumber}", "/user/{id}").hasAnyRole("USER", "ADMIN")
-                        // Доступ только для администраторов
-                        .requestMatchers("/hotel", "/hotel/{id}", "/reservation/{id}", "/room/{id}", "/user/{id}").hasRole("ADMIN")
+                        // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/endpoint", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-
     }
 
     @Bean

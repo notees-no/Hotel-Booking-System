@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
@@ -21,46 +21,51 @@ public class RoomController {
 		this.roomService = roomService;
 	}
 
+	// Логика получения информации о номере для пользователей
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-	public ResponseEntity<?> getRoomByIdForUser(@PathVariable Long id) {
+	public ResponseEntity<Room> getRoomByIdForUser(@PathVariable Long id) {
 		Room room = roomService.read(id);
 		if (room == null) {
-			return new ResponseEntity<>("Room not found", HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found");
 		}
 		return ResponseEntity.ok(room);
 	}
 
+	// Логика получения списка номеров по номеру для пользователей
 	@GetMapping("/number/{roomNumber}")
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-	public ResponseEntity<?> getRoomsByNumberForUser(@PathVariable Integer roomNumber) {
+	public ResponseEntity<List<Room>> getRoomsByNumberForUser(@PathVariable Integer roomNumber) {
 		List<Room> rooms = roomService.readByRoomNumber(roomNumber);
 		if (rooms.isEmpty()) {
-			return new ResponseEntity<>("Rooms not found with number: " + roomNumber, HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rooms not found with number: " + roomNumber);
 		}
 		return ResponseEntity.ok(rooms);
 	}
 
+	// Логика добавления нового номера для администраторов
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> addRoomForAdmin(@RequestBody Room room) {
+	public ResponseEntity<String> addRoomForAdmin(@RequestBody Room room) {
 		roomService.save(room);
-		return new ResponseEntity<>("New room added", HttpStatus.CREATED);
+		return ResponseEntity.ok("New room added");
 	}
 
+	// Логика удаления номера для администраторов
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> deleteRoomForAdmin(@PathVariable Long id) {
+	public ResponseEntity<String> deleteRoomForAdmin(@PathVariable Long id) {
 		roomService.delete(id);
-		return new ResponseEntity<>("Room with ID " + id + " deleted", HttpStatus.OK);
+		return ResponseEntity.ok("Room with ID " + id + " deleted");
 	}
 
+	// Логика обновления информации о номере для администраторов
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> updateRoomForAdmin(@PathVariable Long id, @RequestBody Room roomData) {
+	public ResponseEntity<String> updateRoomForAdmin(@PathVariable Long id, @RequestBody Room roomData) {
 		Room existingRoom = roomService.read(id);
 		if (existingRoom == null) {
-			return new ResponseEntity<>("Room not found", HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found");
 		}
 		existingRoom.setRoomNumber(roomData.getRoomNumber());
 		existingRoom.setRoomType(roomData.getRoomType());
@@ -69,6 +74,6 @@ public class RoomController {
 		existingRoom.setAvailable(roomData.getAvailable());
 		existingRoom.setHotel(roomData.getHotel());
 		roomService.edit(existingRoom);
-		return new ResponseEntity<>("Information about room with ID " + id + " updated", HttpStatus.OK);
+		return ResponseEntity.ok("Information about room with ID " + id + " updated");
 	}
 }
