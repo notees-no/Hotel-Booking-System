@@ -36,11 +36,11 @@ CREATE TABLE IF NOT EXISTS `rooms` (
     `noOfPerson` INT NULL,
     `price` DECIMAL(10,2) NULL,
     `available` BOOLEAN NULL,
-    `hotel_hotel_id` BIGINT NULL,
+    `hotel_id` BIGINT NULL,
     PRIMARY KEY (`room_id`),
-    INDEX `FK_rooms_hotel_idx` (`hotel_hotel_id` ASC),
+    INDEX `FK_rooms_hotel_idx` (`hotel_id` ASC),
     CONSTRAINT `FK_rooms_hotel`
-        FOREIGN KEY (`hotel_hotel_id`)
+        FOREIGN KEY (`hotel_id`)
         REFERENCES `hotels` (`hotel_id`)
         ON DELETE NO ACTION
         ON UPDATE NO ACTION
@@ -88,7 +88,7 @@ VALUES (1, 'admin', '$2a$10$4ntneHfvOYZFg8JPeHxh1.S89KlFsmRN/Gu0VWIZ/8ZeqIVUIBML
        (2, 'user1', '$2a$10$BnXIcgFcXjCn0oC4atAVP.bIAk.HUE4y/oK.BW/awcGO8.trcX5XK', 'ROLE_USER');
 
 -- Заполнение таблиц rooms
-INSERT INTO rooms (room_id, roomNumber, roomType, noOfPerson, price, available, hotel_hotel_id)
+INSERT INTO rooms (room_id, roomNumber, roomType, noOfPerson, price, available, hotel_id)
 VALUES (1, 101, 'AC', 2, 100.00, true, 1),
        (2, 102, 'NON_AC', 2, 80.00, true, 1),
        (3, 201, 'AC', 3, 150.00, true, 2),
