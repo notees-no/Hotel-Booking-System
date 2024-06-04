@@ -9,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/hotel")
@@ -26,7 +28,9 @@ public class HotelController {
 	public ResponseEntity<?> getHotelByIdForUnauthorized(@PathVariable Long id) {
 		Hotel hotel = hotelService.read(id);
 		if (hotel == null) {
-			return new ResponseEntity<>("Hotel not found", HttpStatus.NOT_FOUND);
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Hotel not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(hotel, HttpStatus.OK);
 	}
@@ -36,7 +40,9 @@ public class HotelController {
 	public ResponseEntity<?> getHotelsByNameForUnauthorized(@PathVariable String name) {
 		List<Hotel> hotels = hotelService.readByName(name);
 		if (hotels.isEmpty()) {
-			return new ResponseEntity<>("Hotels not found with name: " + name, HttpStatus.NOT_FOUND);
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Hotels not found with name: " + name);
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(hotels, HttpStatus.OK);
 	}
@@ -44,29 +50,37 @@ public class HotelController {
 	// Логика добавления нового отеля для администраторов
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> addHotelForAdmin(@RequestBody Hotel hotel) {
+	public ResponseEntity<?> addHotelForAdmin(@RequestBody Hotel hotel) {
 		hotelService.save(hotel);
-		return new ResponseEntity<>("New hotel added", HttpStatus.CREATED);
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "New hotel added");
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	// Логика удаления отеля для администраторов
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> deleteHotelForAdmin(@PathVariable Long id) {
+	public ResponseEntity<?> deleteHotelForAdmin(@PathVariable Long id) {
 		boolean isDeleted = hotelService.delete(id);
 		if (!isDeleted) {
-			return new ResponseEntity<>("Hotel not found", HttpStatus.NOT_FOUND);
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Hotel not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>("Hotel with ID " + id + " deleted", HttpStatus.OK);
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "Hotel with ID " + id + " deleted");
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// Логика обновления информации об отеле для администраторов
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> updateHotelForAdmin(@PathVariable Long id, @RequestBody Hotel hotelData) {
+	public ResponseEntity<?> updateHotelForAdmin(@PathVariable Long id, @RequestBody Hotel hotelData) {
 		Hotel existingHotel = hotelService.read(id);
 		if (existingHotel == null) {
-			return new ResponseEntity<>("Hotel not found", HttpStatus.NOT_FOUND);
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Hotel not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 		existingHotel.setName(hotelData.getName());
 		existingHotel.setHotelPhone(hotelData.getHotelPhone());
@@ -74,6 +88,8 @@ public class HotelController {
 		existingHotel.setRole(hotelData.getRole());
 		existingHotel.setAmenities(hotelData.getAmenities());
 		hotelService.edit(existingHotel);
-		return new ResponseEntity<>("Information about hotel with ID " + id + " updated", HttpStatus.OK);
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "Information about hotel with ID " + id + " updated");
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

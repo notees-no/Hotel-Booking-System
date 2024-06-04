@@ -8,9 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reservation")
@@ -26,48 +27,63 @@ public class ReservationController {
 	// Логика получения информации о бронировании для пользователей
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-	public ResponseEntity<Reservation> getReservationByIdForUser(@PathVariable Long id) {
+	public ResponseEntity<?> getReservationByIdForUser(@PathVariable Long id) {
 		Reservation reservation = reservationService.read(id);
 		if (reservation == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found");
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Reservation not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
-		return ResponseEntity.ok(reservation);
+		return new ResponseEntity<>(reservation, HttpStatus.OK);
 	}
 
 	// Логика получения списка бронирований по статусу для пользователей
 	@GetMapping("/status/{status}")
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-	public ResponseEntity<List<Reservation>> getReservationsByStatusForUser(@PathVariable String status) {
+	public ResponseEntity<?> getReservationsByStatusForUser(@PathVariable String status) {
 		List<Reservation> reservations = reservationService.readByStatus(ReservationStatus.valueOf(status));
 		if (reservations.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservations not found with status: " + status);
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Reservations not found with status: " + status);
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
-		return ResponseEntity.ok(reservations);
+		return new ResponseEntity<>(reservations, HttpStatus.OK);
 	}
 
 	// Логика добавления нового бронирования для пользователей
 	@PostMapping
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-	public ResponseEntity<String> addReservationForUser(@RequestBody Reservation reservation) {
+	public ResponseEntity<?> addReservationForUser(@RequestBody Reservation reservation) {
 		reservationService.save(reservation);
-		return ResponseEntity.ok("New reservation added");
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "New reservation added");
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	// Логика удаления бронирования для администраторов
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> deleteReservationForAdmin(@PathVariable Long id) {
-		reservationService.delete(id);
-		return ResponseEntity.ok("Reservation with ID " + id + " deleted");
+	public ResponseEntity<?> deleteReservationForAdmin(@PathVariable Long id) {
+		boolean isDeleted = reservationService.delete(id);
+		if (!isDeleted) {
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Reservation not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+		}
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "Reservation with ID " + id + " deleted");
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	// Логика обновления информации о бронировании для администраторов
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> updateReservationForAdmin(@PathVariable Long id, @RequestBody Reservation reservationData) {
+	public ResponseEntity<?> updateReservationForAdmin(@PathVariable Long id, @RequestBody Reservation reservationData) {
 		Reservation existingReservation = reservationService.read(id);
 		if (existingReservation == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found");
+			Map<String, String> response = new HashMap<>();
+			response.put("error", "Reservation not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 		existingReservation.setCheckinDate(reservationData.getCheckinDate());
 		existingReservation.setCheckoutDate(reservationData.getCheckoutDate());
@@ -77,6 +93,8 @@ public class ReservationController {
 		existingReservation.setHotel(reservationData.getHotel());
 		existingReservation.setUser(reservationData.getUser());
 		reservationService.edit(existingReservation);
-		return ResponseEntity.ok("Information about reservation with ID " + id + " updated");
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "Information about reservation with ID " + id + " updated");
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }
