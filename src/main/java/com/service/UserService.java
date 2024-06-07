@@ -7,4 +7,5 @@ public interface UserService extends Service<User> {
 	void create(User user);
 	User getByUsername(String username);
 	UserDetailsService userDetailsService();
+	long count();
 }
