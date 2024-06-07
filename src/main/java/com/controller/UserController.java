@@ -85,4 +85,10 @@ public class UserController {
 		response.put("message", "Information about user with ID " + id + " updated");
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@GetMapping("/count")
+	public ResponseEntity<Long> getUserCount() {
+        long count = userService.count();
+        return new ResponseEntity<>(count, HttpStatus.OK);
+	}
 }
